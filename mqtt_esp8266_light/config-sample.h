@@ -40,6 +40,8 @@ enum strip {
 // MQTT Topics
 #define CONFIG_MQTT_TOPIC_STATE "home/ESP_LED"
 #define CONFIG_MQTT_TOPIC_SET "home/ESP_LED/set"
+#define CONFIG_MQTT_TOPIC_BUTTON "home/button"
+
 
 #define CONFIG_MQTT_PAYLOAD_ON "ON"
 #define CONFIG_MQTT_PAYLOAD_OFF "OFF"

@@ -1,3 +1,4 @@
+
 /*
  * ESP8266 MQTT Lights for Home Assistant.
  *
@@ -25,6 +26,7 @@ const bool rgb = (CONFIG_STRIP == RGB) || (CONFIG_STRIP == RGBW);
 const bool includeWhite = (CONFIG_STRIP == BRIGHTNESS) || (CONFIG_STRIP == RGBW);
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+int buttonState = 0;         // variable for reading the pushbutton status
 
 // Maintained state for reporting to HA
 byte red = 255;
@@ -76,10 +78,15 @@ const byte colors[][4] = {
 };
 const int numColors = 7;
 
+int loopIter = 0;
+char loopIterStr[8];
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void setup() {
+
+  pinMode(CONFIG_PIN_BUTTON, INPUT);
   if (rgb) {
     pinMode(CONFIG_PIN_RED, OUTPUT);
     pinMode(CONFIG_PIN_GREEN, OUTPUT);
@@ -404,8 +411,19 @@ void loop() {
   if (!client.connected()) {
     reconnect();
   }
-
+  if (loopIter > 0) {
+      loopIter--;
+  }
   client.loop();
+  if (loopIter < 5) {
+      buttonState = digitalRead(CONFIG_PIN_BUTTON);
+      if (buttonState == HIGH) {
+        // button pressed
+        itoa(loopIter, loopIterStr, 10);
+        client.publish(CONFIG_MQTT_TOPIC_BUTTON, CONFIG_MQTT_CLIENT_ID, true);
+        loopIter = 20000;
+      } 
+  }
 
   if (flash) {
     if (startFlash) {
